@@ -1,0 +1,19 @@
+WIDTH=32; -- number of bits of data perword
+DEPTH=256; -- the number of addresses
+ADDRESS_RADIX=HEX; 
+DATA_RADIX=HEX; 
+CONTENT 
+BEGIN 
+00 : 20100013; 
+04 : 20110015; 
+08 : 16530008; 
+0C : 00000000; 
+10 : 02119822; 
+14 : 22730000; 
+18 : 22140004; 
+1C : AE910000; 
+20 : 8E950000; 
+24 : 02A50020; 
+28 : 08000000; 
+2C : 00000000; 
+END;
