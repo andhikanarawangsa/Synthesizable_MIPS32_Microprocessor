@@ -2,40 +2,19 @@
 
 A synthesizable **32-bit, single-cycle-style MIPS32 subset processor** written in VHDL. The design integrates instruction fetch, decode, register access, arithmetic/logic execution, branching, data-memory access, and write-back in a modular datapath.
 
-> **ISA scope:** This is not a complete MIPS32 implementation. It implements the instruction subset listed below for educational RTL design, functional simulation, and FPGA-oriented synthesis.
-
-## Highlights
-
-- Modular VHDL RTL architecture with a dedicated top-level integration module
-- 32-bit custom carry-lookahead adder (CLA) used by the ALU and PC/branch-address arithmetic
-- 32 × 32-bit register file with two read ports, one synchronous write port, and an immutable `$zero` register
-- ROM-based instruction memory and single-port RAM-based data memory initialized from `.mif` files
-- PC sequencing for sequential execution, conditional branches, and absolute jumps
-- Functional simulation through `tb_top_level.vhd`
-- Synthesizable Intel/Altera memory instantiation through `altsyncram`
-
-## Supported Instruction Subset
-
-| Category | Instructions | Implemented behavior |
-|---|---|---|
-| R-type arithmetic | `add`, `sub` | Register-to-register addition and subtraction |
-| I-type arithmetic | `addi` | Register plus sign-extended immediate |
-| Conditional control flow | `beq`, `bne` | Equality and inequality branch decisions via a 32-bit comparator |
-| Memory access | `lw`, `sw` | Base-plus-offset load and store |
-| Unconditional control flow | `j` | Absolute jump target formed from `PC + 4` and the 26-bit instruction field |
-| No operation | `nop` | Encoded as `sll $zero, $zero, 0` (`0x00000000`) |
-
 ## Architecture
 
-The processor follows the familiar single-cycle MIPS datapath organization:
+The processor implements a synthesizable single-cycle MIPS32-style datapath
 
-1. The **program counter** addresses instruction memory.
-2. The **control unit** decodes opcode and function fields to generate datapath control signals.
-3. The **register file** supplies two source operands.
-4. The **ALU** performs addition or subtraction using a custom 32-bit CLA implementation.
-5. The **comparator** determines branch equality.
-6. The datapath selects the next PC from sequential, branch, jump, or reset paths.
-7. Load data or ALU output is written back to the register file when enabled.
+The Program Counter fetches instructions from Instruction Memory, while the Control Unit decodes the opcode and generates control signals for register write-back, ALU operation, memory access, branching, and jumping. The Register File supplies operands to the ALU, whose result is used for arithmetic operations or as a data-memory address.
+
+For `lw`, memory data is written back to the register file; for `sw`, register data is written to memory. Branch logic selects the branch target for `beq` and `bne`, while the jump path generates the target address for `j`. The PC multiplexer then selects the next instruction address.
+
+<p align="center">
+  <img src="datapath_architecture.png"
+       alt="MIPS32 microprocessor datapath architecture"
+       width="100%">
+</p>
 
 Key RTL modules:
 
@@ -50,6 +29,17 @@ Key RTL modules:
 | `src/instruction_memory.vhd` | ROM wrapper initialized by `imemory.mif` |
 | `src/data_memory.vhd` | Single-port RAM wrapper initialized by `dmemory.mif` |
 | `src/tb_top_level.vhd` | Functional testbench with clock and reset generation |
+
+## Supported Instruction Subset
+
+| Category | Instructions | Implemented behavior |
+|---|---|---|
+| R-type arithmetic | `add`, `sub` | Register-to-register addition and subtraction |
+| I-type arithmetic | `addi` | Register plus sign-extended immediate |
+| Conditional control flow | `beq`, `bne` | Equality and inequality branch decisions via a 32-bit comparator |
+| Memory access | `lw`, `sw` | Base-plus-offset load and store |
+| Unconditional control flow | `j` | Absolute jump target formed from `PC + 4` and the 26-bit instruction field |
+| No operation | `nop` | Encoded as `sll $zero, $zero, 0` (`0x00000000`) |
 
 ## Verification Program
 
